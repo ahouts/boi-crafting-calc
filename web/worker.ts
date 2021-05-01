@@ -49,7 +49,7 @@ async function saveCache(db: IDBDatabase, cache: CraftingCache) {
     });
 }
 
-async function main() {
+(async () => {
     await init();
 
     const db = await setupDatabase();
@@ -70,6 +70,4 @@ async function main() {
                 assertUnreachable(msg.type);
         }
     };
-}
-
-main();
+})();
