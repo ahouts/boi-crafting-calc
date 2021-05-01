@@ -3,6 +3,7 @@ name = "boi-crafting-calc"
 version = "0.1.0"
 authors = ["Andrew Houts <ahouts4@gmail.com>"]
 edition = "2018"
+license = "MIT OR Apache-2.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

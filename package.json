@@ -4,10 +4,11 @@
   "description": "",
   "private": true,
   "scripts": {
-    "build": "wasm-pack build --target web --release && npx webpack --config webpack.config.js --mode production",
-    "test": "wasm-pack test --chrome --headless"
+    "build": "mkdir -p dist && cp -r static/* dist && wasm-pack build --target web --release && npx webpack --config webpack.config.js --mode production",
+    "test": "wasm-pack test --chrome --headless",
+    "clean": "rm -rf dist node_modules pkg target"
   },
-  "author": "",
+  "author": "Andrew Houts <ahouts4@gmail.com>",
   "license": "MIT OR Apache-2.0",
   "devDependencies": {
     "eslint": "^7.25.0",

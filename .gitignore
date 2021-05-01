@@ -4,7 +4,4 @@ Cargo.lock
 /pkg
 /node_modules
 package-lock.json
-
-!/
-/dist/*
-!/dist/index.html
+/dist
