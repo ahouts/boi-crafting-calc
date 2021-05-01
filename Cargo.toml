@@ -10,6 +10,8 @@ crate-type = ["cdylib", "rlib"]
 
 [profile.release]
 opt-level = "s"
+codegen-units = 1
+lto = true
 
 [dependencies]
 serde-xml-rs = "0.4"

@@ -3,7 +3,22 @@
     "browser": true
   },
   "rules": {
-    "quotes": ["error", "single", { "avoidEscape":  true }]
+    "quotes": [
+      "error",
+      "single",
+      {
+        "avoidEscape": true
+      }
+    ],
+    "default-case": "error",
+    "camelcase": [
+      "error",
+      {
+        "properties": "never"
+      }
+    ],
+    "comma-dangle": ["error", "always"],
+    "no-extra-semi": "error"
   },
   "ignorePatterns": [
     "pkg/*"

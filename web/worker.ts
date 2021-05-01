@@ -1,4 +1,5 @@
-import init, {CraftingCache} from '../pkg/boi_crafting_calc.js';
+import init, {CraftingCache} from '../pkg/boi_crafting_calc';
+import {assertUnreachable, WorkerRequest, WorkerResponseReady} from './api';
 
 const worker: DedicatedWorkerGlobalScope = self;
 const dbName = 'crafting-cache';
@@ -33,10 +34,7 @@ async function getCacheIfExists(db: IDBDatabase): Promise<CraftingCache | null> 
     if (result === undefined) {
         return null;
     }
-    const start = worker.performance.now();
-    const c = CraftingCache.deserialize(result);
-    console.log(`took ${worker.performance.now() - start}ms`);
-    return c;
+    return CraftingCache.deserialize(result);
 }
 
 async function saveCache(db: IDBDatabase, cache: CraftingCache) {
@@ -71,5 +69,5 @@ async function saveCache(db: IDBDatabase, cache: CraftingCache) {
         }
     };
 
-    worker.postMessage(new WorkerResponseReady());
+    worker.postMessage(WorkerResponseReady);
 })();

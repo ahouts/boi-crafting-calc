@@ -1,27 +1,27 @@
-function assertUnreachable(_: never): never {
+export function assertUnreachable(_: never): never {
     throw new Error("unreachable code reached...");
 }
 
-type WorkerRequestType = 'shutdown';
+export type WorkerRequestType = 'shutdown';
 
-interface WorkerRequest {
+export interface WorkerRequest {
     type: WorkerRequestType;
 }
 
-class WorkerRequestShutdown implements WorkerRequest {
+export const WorkerRequestShutdown: WorkerRequest = {
     type: 'shutdown'
 }
 
-type WorkerResponseType = 'ready' | 'answer';
+export type WorkerResponseType = 'ready' | 'answer'
 
-interface WorkerResponse {
+export interface WorkerResponse {
     type: WorkerResponseType,
 }
 
-class WorkerResponseReady implements WorkerResponse {
-    type: 'ready'
+export const WorkerResponseReady: WorkerResponse = {
+    type: "ready",
 }
 
-class WorkerResponseAnswer implements WorkerResponse {
+export const WorkerResponseAnswer: WorkerResponse = {
     type: 'answer'
 }
