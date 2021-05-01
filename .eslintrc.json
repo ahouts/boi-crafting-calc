@@ -1,4 +1,12 @@
 {
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
   "env": {
     "browser": true
   },
@@ -21,6 +29,7 @@
     "no-extra-semi": "error"
   },
   "ignorePatterns": [
-    "pkg/*"
+    "pkg/*",
+    "*.js"
   ]
 }

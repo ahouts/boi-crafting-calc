@@ -1,5 +1,5 @@
-import init, {CraftingCache} from '../pkg/boi_crafting_calc';
-import {assertUnreachable, WorkerRequest, WorkerResponseReady} from './api';
+import init, {CraftingCache,} from '../pkg/boi_crafting_calc';
+import {assertUnreachable, WorkerRequest, WorkerResponseReady,} from './api';
 
 const worker: DedicatedWorkerGlobalScope = self;
 const dbName = 'crafting-cache';
