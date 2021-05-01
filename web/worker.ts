@@ -70,4 +70,6 @@ async function saveCache(db: IDBDatabase, cache: CraftingCache) {
                 assertUnreachable(msg.type);
         }
     };
+
+    worker.postMessage(new WorkerResponseReady());
 })();

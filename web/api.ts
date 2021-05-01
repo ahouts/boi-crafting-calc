@@ -1,4 +1,4 @@
-function assertUnreachable(x: never): never {
+function assertUnreachable(_: never): never {
     throw new Error("unreachable code reached...");
 }
 
