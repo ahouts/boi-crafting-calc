@@ -703,7 +703,7 @@ impl Serialize for CraftingCache {
     where
         S: Serializer,
     {
-        let mut seq = serializer.serialize_seq(Some(self.cache.len()))?;
+        let mut seq = serializer.serialize_seq(Some(self.cache.capacity()))?;
         for (k, v) in self.cache.iter() {
             seq.serialize_element(k)?;
             seq.serialize_element(v)?;
