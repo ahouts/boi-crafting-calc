@@ -4,7 +4,8 @@
   "description": "",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "wasm-pack build --target web --release && npx webpack --config webpack.config.js --mode production",
+    "test": "wasm-pack test --chrome --headless"
   },
   "author": "",
   "license": "MIT OR Apache-2.0",
