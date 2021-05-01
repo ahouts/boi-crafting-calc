@@ -1,7 +1,8 @@
 {
   "parser": "@typescript-eslint/parser",
   "plugins": [
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "eslint-snake-case"
   ],
   "extends": [
     "eslint:recommended",
@@ -19,14 +20,36 @@
       }
     ],
     "default-case": "error",
-    "camelcase": [
+    "camelcase": "off",
+    "comma-dangle": [
+      "error",
+      "always-multiline"
+    ],
+    "no-extra-semi": "error",
+    "max-len": [
       "error",
       {
-        "properties": "never"
+        "code": 120
       }
     ],
-    "comma-dangle": ["error", "always"],
-    "no-extra-semi": "error"
+    "array-bracket-spacing": [
+      "error",
+      "always"
+    ],
+    "no-unused-vars": [
+      "error",
+      {
+        "args": "all",
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "args": "all",
+        "argsIgnorePattern": "^_"
+      }
+    ]
   },
   "ignorePatterns": [
     "pkg/*",

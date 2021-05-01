@@ -14,6 +14,7 @@ use std::ops::{Index, IndexMut, RangeInclusive};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -22,6 +23,7 @@ pub fn set_panic_hook() {
     console_error_panic_hook::set_once();
 }
 
+#[wasm_bindgen]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, EnumIter)]
 pub enum Pickup {
     RedHeart,
@@ -198,6 +200,21 @@ impl<'de> Deserialize<'de> for Pickup {
     }
 }
 
+#[wasm_bindgen(typescript_custom_section)]
+const TS_APPEND_CRAFTER: &'static str = r#"
+interface Crafter {
+    craft(pickups: Array<Pickup>): ItemId;
+}
+"#;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(typescript_type = "Array<Pickup>")]
+    pub type Pickups;
+
+    pub type ItemId;
+}
+
 const QUALITY_BOUNDS_LIST: [(u32, RangeInclusive<u32>); 8] = [
     (34, 4..=4),
     (30, 3..=4),
@@ -240,10 +257,11 @@ impl Rng {
     }
 }
 
+#[wasm_bindgen]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct ItemId(u16);
+pub struct InternalItemId(u16);
 
-impl Serialize for ItemId {
+impl Serialize for InternalItemId {
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -252,42 +270,42 @@ impl Serialize for ItemId {
     }
 }
 
-impl<'de> Deserialize<'de> for ItemId {
+impl<'de> Deserialize<'de> for InternalItemId {
     fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error>
     where
         D: Deserializer<'de>,
     {
-        Ok(ItemId(u16::deserialize(deserializer)?))
+        Ok(InternalItemId(u16::deserialize(deserializer)?))
     }
 }
 
-impl From<u16> for ItemId {
+impl From<u16> for InternalItemId {
     fn from(id: u16) -> Self {
-        ItemId(id)
+        InternalItemId(id)
     }
 }
 
-impl From<ItemId> for u16 {
-    fn from(id: ItemId) -> Self {
+impl From<InternalItemId> for u16 {
+    fn from(id: InternalItemId) -> Self {
         id.0
     }
 }
 
-impl From<usize> for ItemId {
+impl From<usize> for InternalItemId {
     fn from(id: usize) -> Self {
-        ItemId(id as u16)
+        InternalItemId(id as u16)
     }
 }
 
-impl From<ItemId> for usize {
-    fn from(id: ItemId) -> Self {
+impl From<InternalItemId> for usize {
+    fn from(id: InternalItemId) -> Self {
         id.0 as usize
     }
 }
 
-impl Slotable for ItemId {
+impl Slotable for InternalItemId {
     fn largest() -> Self {
-        ItemId(730)
+        InternalItemId(730)
     }
 }
 
@@ -309,7 +327,7 @@ struct Pool {
 #[derive(Debug, Deserialize)]
 struct Item {
     #[serde(rename = "Id")]
-    id: ItemId,
+    id: InternalItemId,
     #[serde(rename = "Weight")]
     weight: f32,
 }
@@ -387,7 +405,7 @@ impl ItemPool {
     }
 }
 
-fn get_pool_item_weights() -> HashMap<ItemPool, HashMap<ItemId, f32>> {
+fn get_pool_item_weights() -> HashMap<ItemPool, HashMap<InternalItemId, f32>> {
     const ITEM_POOLS_DATA_ZLIB_DEFLATE: &[u8] = include_bytes!("itempools.xml.zz");
     let reader = ZlibDecoder::new(Cursor::new(ITEM_POOLS_DATA_ZLIB_DEFLATE));
     let pools: ItemPools = serde_xml_rs::from_reader(reader).unwrap();
@@ -416,11 +434,11 @@ struct ItemsMetadata {
 
 #[derive(Debug, Deserialize)]
 struct ItemMetadata {
-    id: ItemId,
+    id: InternalItemId,
     quality: u32,
 }
 
-fn get_item_qualities() -> SlotMap<ItemId, u32> {
+fn get_item_qualities() -> SlotMap<InternalItemId, u32> {
     const ITEM_POOLS_DATA_ZLIB_DEFLATE: &[u8] = include_bytes!("items_metadata.xml.zz");
     let reader = ZlibDecoder::new(Cursor::new(ITEM_POOLS_DATA_ZLIB_DEFLATE));
     let metadata: ItemsMetadata = serde_xml_rs::from_reader(reader).unwrap();
@@ -488,24 +506,25 @@ impl<S: Slotable, T: Debug> Debug for SlotMap<S, T> {
 }
 
 pub trait Crafter {
-    fn craft(&self, pickups: [Pickup; 8]) -> ItemId;
+    fn internal_craft(&self, pickups: [Pickup; 8]) -> InternalItemId;
 }
 
 pub fn possible_items<'a, C: Crafter>(
     crafter: &'a C,
     pickups: &'a [Pickup],
-) -> impl Iterator<Item = ItemId> + 'a {
+) -> impl Iterator<Item = InternalItemId> + 'a {
     pickups.iter().copied().combinations(8).map(move |group| {
         let mut k = [Pickup::RedHeart; 8];
         k.copy_from_slice(group.as_slice());
-        crafter.craft(k)
+        crafter.internal_craft(k)
     })
 }
 
+#[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct BasicCrafter {
-    pool_item_weights: HashMap<ItemPool, HashMap<ItemId, f32>>,
-    item_qualities: SlotMap<ItemId, u32>,
+    pool_item_weights: HashMap<ItemPool, HashMap<InternalItemId, f32>>,
+    item_qualities: SlotMap<InternalItemId, u32>,
 }
 
 impl Default for BasicCrafter {
@@ -519,7 +538,7 @@ impl Default for BasicCrafter {
 }
 
 impl Crafter for BasicCrafter {
-    fn craft(&self, pickups: [Pickup; 8]) -> ItemId {
+    fn internal_craft(&self, pickups: [Pickup; 8]) -> InternalItemId {
         let mut rng = Rng::default();
         let pickup_counts = pickups.iter().fold(BTreeMap::new(), |mut acc, p| {
             *acc.entry(*p).or_default() += 1;
@@ -577,7 +596,7 @@ impl Crafter for BasicCrafter {
             ));
         }
 
-        let mut item_weights = SlotMap::<ItemId, f32>::default();
+        let mut item_weights = SlotMap::<InternalItemId, f32>::default();
         let mut weight_total = 0_f32;
 
         for (pool, pool_weight) in pool_weights.iter() {
@@ -616,8 +635,46 @@ impl Crafter for BasicCrafter {
             }
         }
 
-        ItemId::from(25_u16)
+        InternalItemId::from(25_u16)
     }
+}
+
+#[wasm_bindgen]
+impl BasicCrafter {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn craft(&self, pickups: Pickups) -> Result<ItemId, JsValue> {
+        let mut pickups = js_cast_pickups(pickups)?;
+        for i in 0..pickups.len() {
+            for j in i..pickups.len() {
+                if pickups[j] < pickups[i] {
+                    pickups.swap(i, j);
+                }
+            }
+        }
+        Ok(JsValue::from(self.internal_craft(pickups).0).unchecked_into())
+    }
+}
+
+fn js_cast_pickups(pickups: Pickups) -> Result<[Pickup; 8], JsValue> {
+    let array: js_sys::Array = pickups.unchecked_into();
+    if array.length() != 8 {
+        return Err(JsValue::from(
+            "must provide exactly 8 pickups when crafting",
+        ));
+    }
+    let mut k = [Pickup::RedHeart; 8];
+    for (i, v) in k.iter_mut().enumerate() {
+        *v = unsafe {
+            wasm_bindgen::convert::FromWasmAbi::from_abi(
+                array.get(i as u32).as_f64().unwrap() as u32
+            )
+        };
+    }
+    Ok(k)
 }
 
 struct HashWrapper(highway::HighwayBuildHasher);
@@ -645,11 +702,11 @@ impl Default for HashWrapper {
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct CraftingCache {
-    cache: HashMap<[Pickup; 8], ItemId, HashWrapper>,
+    cache: HashMap<[Pickup; 8], InternalItemId, HashWrapper>,
 }
 
 impl Crafter for CraftingCache {
-    fn craft(&self, mut pickups: [Pickup; 8]) -> ItemId {
+    fn internal_craft(&self, mut pickups: [Pickup; 8]) -> InternalItemId {
         for i in 0..pickups.len() {
             for j in i..pickups.len() {
                 if pickups[j] < pickups[i] {
@@ -663,9 +720,14 @@ impl Crafter for CraftingCache {
 
 #[wasm_bindgen]
 impl CraftingCache {
+    #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         set_panic_hook();
         Self::default()
+    }
+
+    pub fn craft(&self, pickups: Pickups) -> Result<ItemId, JsValue> {
+        Ok(JsValue::from(self.internal_craft(js_cast_pickups(pickups)?).0).unchecked_into())
     }
 
     pub fn serialize(&self) -> Result<Box<[u8]>, JsValue> {
@@ -692,7 +754,7 @@ impl Default for CraftingCache {
         for combination in Pickup::iter().combinations_with_replacement(8) {
             let mut k = [Pickup::RedHeart; 8];
             k.copy_from_slice(combination.as_slice());
-            cache.insert(k, basic_crafter.craft(k));
+            cache.insert(k, basic_crafter.internal_craft(k));
         }
         CraftingCache { cache }
     }
@@ -729,7 +791,7 @@ impl<'de> Deserialize<'de> for CraftingCache {
             where
                 A: SeqAccess<'de>,
             {
-                let mut cache = HashMap::<[Pickup; 8], ItemId, _>::with_capacity_and_hasher(
+                let mut cache = HashMap::<[Pickup; 8], InternalItemId, _>::with_capacity_and_hasher(
                     seq.size_hint().unwrap(),
                     HashWrapper::default(),
                 );
@@ -752,7 +814,8 @@ impl<'de> Deserialize<'de> for CraftingCache {
 mod tests {
     use super::*;
     use once_cell::sync::Lazy;
-    use wasm_bindgen_test::*;
+    use wasm_bindgen_test::wasm_bindgen_test;
+    use Pickup::*;
 
     wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
@@ -761,16 +824,10 @@ mod tests {
     #[wasm_bindgen_test]
     fn try_craft_moms_knife() {
         assert_eq!(
-            ItemId(114),
-            SIMPLE_CACHE.craft([
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
+            InternalItemId(114),
+            SIMPLE_CACHE.internal_craft([
+                SoulHeart, SoulHeart, SoulHeart, SoulHeart, SoulHeart, SoulHeart, SoulHeart,
+                SoulHeart,
             ])
         )
     }
@@ -778,16 +835,16 @@ mod tests {
     #[wasm_bindgen_test]
     fn try_craft_sworn_protector() {
         assert_eq!(
-            ItemId(363),
-            SIMPLE_CACHE.craft([
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
-                Pickup::EternalHeart,
-                Pickup::LuckyPenny,
+            InternalItemId(363),
+            SIMPLE_CACHE.internal_craft([
+                SoulHeart,
+                SoulHeart,
+                SoulHeart,
+                SoulHeart,
+                SoulHeart,
+                SoulHeart,
+                EternalHeart,
+                LuckyPenny,
             ])
         )
     }
@@ -795,16 +852,9 @@ mod tests {
     #[wasm_bindgen_test]
     fn try_craft_rotten_meat() {
         assert_eq!(
-            ItemId(26),
-            SIMPLE_CACHE.craft([
-                Pickup::RedHeart,
-                Pickup::RedHeart,
-                Pickup::SoulHeart,
-                Pickup::Penny,
-                Pickup::Penny,
-                Pickup::Nickel,
-                Pickup::LuckyPenny,
-                Pickup::Key,
+            InternalItemId(26),
+            SIMPLE_CACHE.internal_craft([
+                RedHeart, RedHeart, SoulHeart, Penny, Penny, Nickel, LuckyPenny, Key,
             ])
         )
     }
@@ -812,17 +862,24 @@ mod tests {
     #[wasm_bindgen_test]
     fn try_craft_luna() {
         assert_eq!(
-            ItemId(589),
-            SIMPLE_CACHE.craft([
-                Pickup::SoulHeart,
-                Pickup::SoulHeart,
-                Pickup::Nickel,
-                Pickup::Card,
-                Pickup::Card,
-                Pickup::Rune,
-                Pickup::Rune,
-                Pickup::Rune,
-            ])
+            InternalItemId(589),
+            SIMPLE_CACHE
+                .internal_craft([SoulHeart, SoulHeart, Nickel, Card, Card, Rune, Rune, Rune,])
         )
+    }
+
+    #[wasm_bindgen_test]
+    fn try_converting_pickup() {
+        let to_convert = [
+            RedHeart, RedHeart, SoulHeart, Penny, Penny, Nickel, LuckyPenny, Key,
+        ];
+        let array = js_sys::Array::new_with_length(8);
+        for (i, p) in to_convert.iter().copied().enumerate() {
+            array.set(
+                i as u32,
+                JsValue::from(wasm_bindgen::convert::IntoWasmAbi::into_abi(p)),
+            );
+        }
+        assert_eq!(to_convert, js_cast_pickups(array.unchecked_into()).unwrap())
     }
 }

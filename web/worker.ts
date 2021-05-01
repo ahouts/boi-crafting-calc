@@ -53,7 +53,7 @@ async function saveCache(db: IDBDatabase, cache: CraftingCache) {
     const db = await setupDatabase();
     let cache = await getCacheIfExists(db);
     if (cache === null) {
-        cache = CraftingCache.new();
+        cache = new CraftingCache();
         await saveCache(db, cache);
     }
 
