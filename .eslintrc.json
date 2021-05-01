@@ -6,10 +6,18 @@
   ],
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended"
   ],
   "env": {
     "browser": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
   },
   "rules": {
     "quotes": [
@@ -25,7 +33,6 @@
       "error",
       "always-multiline"
     ],
-    "no-extra-semi": "error",
     "max-len": [
       "error",
       {
@@ -49,7 +56,9 @@
         "args": "all",
         "argsIgnorePattern": "^_"
       }
-    ]
+    ],
+    "no-extra-semi": "off",
+    "semi": "off"
   },
   "ignorePatterns": [
     "pkg/*",

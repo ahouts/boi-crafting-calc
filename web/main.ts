@@ -6,19 +6,20 @@ import { Pickup } from '../pkg'
 // })
 // worker.onerror = console.error;
 // worker.onmessage = console.log;
-
-(async () => {
-  const ptr = await crafting_pointer;
-  console.log(ptr
-    .get()
-    .craft([
-      Pickup.Key,
-      Pickup.LuckyPenny,
-      Pickup.Nickel,
-      Pickup.RedHeart,
-      Pickup.RedHeart,
-      Pickup.Penny,
-      Pickup.Penny,
-      Pickup.SoulHeart,
-    ]));
-})();
+;(async () => {
+  const ptr = await crafting_pointer
+  console.log(
+    ptr
+      .get()
+      .craft([
+        Pickup.Key,
+        Pickup.LuckyPenny,
+        Pickup.Nickel,
+        Pickup.RedHeart,
+        Pickup.RedHeart,
+        Pickup.Penny,
+        Pickup.Penny,
+        Pickup.SoulHeart,
+      ]),
+  )
+})()
