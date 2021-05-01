@@ -1,0 +1,40 @@
+[package]
+name = "boi-crafting-calc"
+version = "0.1.0"
+authors = ["Andrew Houts <ahouts4@gmail.com>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+opt-level = "s"
+
+[dependencies]
+serde-xml-rs = "0.4"
+strum = "0.20"
+strum_macros = "0.20"
+itertools = "0.10"
+bincode = "1.3"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+flate2 = "1.0"
+highway = "0.6"
+wee_alloc = "0.4"
+js-sys = "0.3"
+console_error_panic_hook = "0.1"
+
+[dependencies.web-sys]
+version = "0.3"
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
+
+[dependencies.smartstring]
+version = "0.2"
+features = ["serde"]
+
+[dev-dependencies]
+once_cell = "1.7"
+wasm-bindgen-test = "0.3"

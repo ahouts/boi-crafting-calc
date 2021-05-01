@@ -1,0 +1,11 @@
+{
+  "env": {
+    "browser": true
+  },
+  "rules": {
+    "quotes": ["error", "single", { "avoidEscape":  true }]
+  },
+  "ignorePatterns": [
+    "pkg/*"
+  ]
+}

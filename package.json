@@ -1,0 +1,20 @@
+{
+  "name": "boi-crafting-calc",
+  "version": "0.1.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT OR Apache-2.0",
+  "devDependencies": {
+    "eslint": "^7.25.0",
+    "eslint-plugin-webassembly": "^1.11.0",
+    "eslint-webpack-plugin": "^2.5.4",
+    "ts-loader": "^9.1.1",
+    "typescript": "^4.2.4",
+    "webpack": "^5.36.2",
+    "webpack-cli": "^4.6.0"
+  }
+}
