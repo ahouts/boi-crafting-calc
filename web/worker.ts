@@ -2,10 +2,10 @@ import init, { CraftingCache } from '../pkg/boi_crafting_calc'
 import {
   visit_request,
   WorkerRequest,
-  worker_request_craft,
-  WorkerRequestVisitor,
   worker_response_craft,
   worker_response_ready,
+  WorkerRequestVisitor,
+  WorkerRequestCraft,
 } from './api'
 
 const worker: DedicatedWorkerGlobalScope = self
@@ -68,8 +68,9 @@ async function save_cache(db: IDBDatabase, cache: CraftingCache) {
     const msg: WorkerRequest = message.data
     visit_request(
       msg,
-      new (class implements worker_request_visitor<void> {
-        visit_craft(craft: worker_request_craft) {
+      new (class implements WorkerRequestVisitor<void> {
+        visit_craft(craft: WorkerRequestCraft) {
+          console.log('fast version')
           const item_id = cache.craft(craft.pickups)
           worker.postMessage(
             worker_response_craft({

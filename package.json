@@ -4,7 +4,7 @@
   "description": "",
   "private": true,
   "scripts": {
-    "build": "mkdir -p dist && cp -r static/* dist && wasm-pack build --target web --release && npx webpack --config webpack.config.js --mode production",
+    "build": "mkdir -p dist && wasm-pack build --target web --release && npm i && rm -rf dist/* && cp -r static/* dist && npx webpack --config webpack.config.js --mode production",
     "test": "wasm-pack test --chrome --headless",
     "clean": "rm -rf dist node_modules pkg target"
   },

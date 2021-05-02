@@ -27,7 +27,8 @@
       "TSTypeReference",
       "ImportSpecifier",
       "TSInterfaceDeclaration",
-      "MemberExpression"
+      "MemberExpression",
+      "TSClassImplements"
     ],
     "snakecasejs/whitelist": ["externalPath", "setNumber"]
   },
@@ -65,7 +66,10 @@
     ],
     "no-extra-semi": "off",
     "semi": "off",
-    "snakecasejs/snakecasejs": "error"
+    "snakecasejs/snakecasejs": "error",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-this-alias": "off",
+    "consistent-this": ["error", "self"]
   },
   "ignorePatterns": [
     "pkg/*",

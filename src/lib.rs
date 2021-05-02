@@ -201,13 +201,6 @@ impl<'de> Deserialize<'de> for Pickup {
 }
 
 #[wasm_bindgen(typescript_custom_section)]
-const TS_APPEND_CRAFTER: &'static str = r#"
-interface Crafter {
-    craft(pickups: Array<Pickup>): ItemId;
-}
-"#;
-
-#[wasm_bindgen(typescript_custom_section)]
 const TS_APPEND_ITEM_ID: &'static str = r#"
 type ItemId = number;
 "#;
