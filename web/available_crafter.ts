@@ -4,6 +4,8 @@ export interface Crafter {
   priority: number
 
   craft(pickups: Array<Pickup>): Promise<ItemId>
+
+  shutdown(): void
 }
 
 class CrafterPointer {
@@ -19,7 +21,15 @@ class CrafterPointer {
 
   update(new_crafter: Crafter) {
     if (this.crafter === null || this.crafter.priority < new_crafter.priority) {
+      this.clear()
       this.crafter = new_crafter
+    }
+  }
+
+  clear() {
+    if (this.crafter !== null) {
+      this.crafter.shutdown()
+      this.crafter = null
     }
   }
 }
@@ -41,6 +51,10 @@ export default (async (): Promise<CrafterPointer> => {
 
       craft(pickups: Array<Pickup>): Promise<ItemId> {
         return Promise.resolve(this.crafter.craft(pickups))
+      }
+
+      shutdown() {
+        this.crafter.free()
       }
     })(),
   )

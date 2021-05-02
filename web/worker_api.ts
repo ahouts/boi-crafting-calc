@@ -2,6 +2,7 @@ import {
   RequestId,
   visit_response,
   worker_request_craft,
+  worker_request_shutdown,
   WorkerResponse,
   WorkerResponseCraft,
   WorkerResponseVisitor,
@@ -52,5 +53,9 @@ export class WorkerApi implements Crafter {
     })
     this.request_id += 1
     return await promise
+  }
+
+  shutdown(): void {
+    this.worker.postMessage(worker_request_shutdown)
   }
 }

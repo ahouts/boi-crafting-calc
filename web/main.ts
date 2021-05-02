@@ -11,22 +11,27 @@ worker.onerror = console.error
   const ptr = await crafting_pointer
 
   const run_craft = async () => {
+    const crafter = ptr.get()
     console.log(
-      await ptr
-        .get()
-        .craft([
-          Pickup.Key,
-          Pickup.LuckyPenny,
-          Pickup.Nickel,
-          Pickup.RedHeart,
-          Pickup.RedHeart,
-          Pickup.Penny,
-          Pickup.Penny,
-          Pickup.SoulHeart,
-        ]),
+      crafter === null
+        ? 'pointer is null'
+        : await crafter.craft([
+            Pickup.Key,
+            Pickup.LuckyPenny,
+            Pickup.Nickel,
+            Pickup.RedHeart,
+            Pickup.RedHeart,
+            Pickup.Penny,
+            Pickup.Penny,
+            Pickup.SoulHeart,
+          ]),
     )
     setTimeout(run_craft, 5000)
   }
+
+  setTimeout(() => {
+    ptr.clear()
+  }, 50000)
 
   await run_craft()
 })()

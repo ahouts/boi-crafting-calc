@@ -8,7 +8,7 @@ type OmitType<T> = Omit<T, 'type'>
 
 type ApiBuilder<T> = (opts: OmitType<T>) => T
 
-export type WorkerRequestType = 'craft'
+export type WorkerRequestType = 'craft' | 'shutdown'
 
 export interface WorkerRequest {
   type: WorkerRequestType
@@ -16,10 +16,14 @@ export interface WorkerRequest {
 
 export interface WorkerRequestVisitor<T> {
   visit_craft(craft: WorkerRequestCraft): T
+
+  visit_shutdown(): T
 }
 
 export function visit_request<T>(request: WorkerRequest, visitor: WorkerRequestVisitor<T>): T {
   switch (request.type) {
+    case 'shutdown':
+      return visitor.visit_shutdown()
     case 'craft':
       return visitor.visit_craft(request as WorkerRequestCraft)
     default:
@@ -39,6 +43,10 @@ export const worker_request_craft: ApiBuilder<WorkerRequestCraft> = (opts) => ({
   type: 'craft',
   ...opts,
 })
+
+export const worker_request_shutdown: WorkerRequest = {
+  type: 'shutdown',
+}
 
 export type WorkerResponseType = 'ready' | 'craft'
 

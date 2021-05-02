@@ -58,10 +58,13 @@ async function save_cache(db: IDBDatabase, cache: CraftingCache) {
   await init()
 
   const db = await setup_database()
-  let cache = await get_cache_if_exists(db)
-  if (cache === null) {
+  const maybe_cache = await get_cache_if_exists(db)
+  let cache: CraftingCache
+  if (maybe_cache === null) {
     cache = new CraftingCache()
     await save_cache(db, cache)
+  } else {
+    cache = maybe_cache
   }
 
   worker.onmessage = (message) => {
@@ -70,7 +73,6 @@ async function save_cache(db: IDBDatabase, cache: CraftingCache) {
       msg,
       new (class implements WorkerRequestVisitor<void> {
         visit_craft(craft: WorkerRequestCraft) {
-          console.log('fast version')
           const item_id = cache.craft(craft.pickups)
           worker.postMessage(
             worker_response_craft({
@@ -78,6 +80,11 @@ async function save_cache(db: IDBDatabase, cache: CraftingCache) {
               item_id,
             }),
           )
+        }
+
+        visit_shutdown(): void {
+          cache.free()
+          worker.close()
         }
       })(),
     )
