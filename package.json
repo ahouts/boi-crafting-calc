@@ -17,6 +17,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-eslint-snake-case": "^0.0.6",
     "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-snakecasejs": "^2.2.0",
     "eslint-plugin-webassembly": "^1.11.0",
     "eslint-webpack-plugin": "^2.5.4",
     "prettier": "^2.2.1",

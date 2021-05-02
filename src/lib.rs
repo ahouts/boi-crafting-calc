@@ -207,6 +207,11 @@ interface Crafter {
 }
 "#;
 
+#[wasm_bindgen(typescript_custom_section)]
+const TS_APPEND_ITEM_ID: &'static str = r#"
+type ItemId = number;
+"#;
+
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(typescript_type = "Array<Pickup>")]
@@ -257,7 +262,6 @@ impl Rng {
     }
 }
 
-#[wasm_bindgen]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct InternalItemId(u16);
 

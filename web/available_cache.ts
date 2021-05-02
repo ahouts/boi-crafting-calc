@@ -11,8 +11,8 @@ class Pointer<T> {
     return this.val
   }
 
-  update(newVal: T) {
-    this.val = newVal
+  update(new_val: T) {
+    this.val = new_val
   }
 }
 
