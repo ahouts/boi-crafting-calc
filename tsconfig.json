@@ -7,9 +7,11 @@
     "jsx": "react",
     "allowJs": true,
     "moduleResolution": "node",
+    "strict": true,
     "lib": [
+      "es2020",
+      "dom",
       "webworker"
-    ],
-    "strict": true
+    ]
   }
 }

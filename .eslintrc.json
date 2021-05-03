@@ -6,8 +6,8 @@
   ],
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended"
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
   "env": {
     "browser": true
@@ -20,6 +20,9 @@
     }
   },
   "settings": {
+    "react": {
+      "version": "detect"
+    },
     "snakecasejs/filter": [
       "ClassDeclaration",
       "NewExpression",
@@ -28,9 +31,16 @@
       "ImportSpecifier",
       "TSInterfaceDeclaration",
       "MemberExpression",
-      "TSClassImplements"
+      "TSClassImplements",
+      "CallExpression",
+      "TSQualifiedName",
+      "Property",
+      "TSImportEqualsDeclaration"
     ],
-    "snakecasejs/whitelist": ["externalPath", "setNumber"]
+    "snakecasejs/whitelist": [
+      "externalPath",
+      "setNumber"
+    ]
   },
   "rules": {
     "quotes": [
@@ -64,12 +74,18 @@
         "argsIgnorePattern": "^_"
       }
     ],
-    "no-extra-semi": "off",
-    "semi": "off",
+    "no-extra-semi": "error",
+    "semi": [
+      "error",
+      "never"
+    ],
     "snakecasejs/snakecasejs": "error",
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/no-this-alias": "off",
-    "consistent-this": ["error", "self"]
+    "consistent-this": [
+      "error",
+      "self"
+    ]
   },
   "ignorePatterns": [
     "pkg/*",
