@@ -6,7 +6,6 @@ use std::marker::PhantomData;
 use std::ops::{Index, IndexMut, RangeInclusive};
 
 use flate2::read::ZlibDecoder;
-use itertools::Itertools;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use smartstring::{LazyCompact, SmartString};
 use strum::IntoEnumIterator;
@@ -53,62 +52,64 @@ pub enum Pickup {
 
 impl Pickup {
     fn weight(self) -> u32 {
+        use Pickup::*;
         match self {
-            Pickup::RedHeart => 1,
-            Pickup::SoulHeart => 4,
-            Pickup::BlackHeart => 5,
-            Pickup::EternalHeart => 5,
-            Pickup::GoldHeart => 5,
-            Pickup::BoneHeart => 5,
-            Pickup::RottenHeart => 1,
-            Pickup::Penny => 1,
-            Pickup::Nickel => 3,
-            Pickup::Dime => 5,
-            Pickup::LuckyPenny => 8,
-            Pickup::Key => 2,
-            Pickup::GoldenKey => 5,
-            Pickup::ChargedKey => 5,
-            Pickup::Bomb => 2,
-            Pickup::GoldenBomb => 6,
-            Pickup::GigaBomb => 10,
-            Pickup::MicroBattery => 2,
-            Pickup::LilBattery => 4,
-            Pickup::MegaBattery => 8,
-            Pickup::Card => 2,
-            Pickup::Pill => 2,
-            Pickup::Rune => 4,
-            Pickup::DiceShard => 4,
-            Pickup::CrackedKey => 2,
+            RedHeart => 1,
+            SoulHeart => 4,
+            BlackHeart => 5,
+            EternalHeart => 5,
+            GoldHeart => 5,
+            BoneHeart => 5,
+            RottenHeart => 1,
+            Penny => 1,
+            Nickel => 3,
+            Dime => 5,
+            LuckyPenny => 8,
+            Key => 2,
+            GoldenKey => 5,
+            ChargedKey => 5,
+            Bomb => 2,
+            GoldenBomb => 6,
+            GigaBomb => 10,
+            MicroBattery => 2,
+            LilBattery => 4,
+            MegaBattery => 8,
+            Card => 2,
+            Pill => 2,
+            Rune => 4,
+            DiceShard => 4,
+            CrackedKey => 2,
         }
     }
 
     fn shifts(self) -> (u32, u32, u32) {
+        use Pickup::*;
         match self {
-            Pickup::RedHeart => (0x00000001, 0x00000005, 0x00000013),
-            Pickup::SoulHeart => (0x00000001, 0x00000009, 0x0000001D),
-            Pickup::BlackHeart => (0x00000001, 0x0000000B, 0x00000006),
-            Pickup::EternalHeart => (0x00000001, 0x0000000B, 0x00000010),
-            Pickup::GoldHeart => (0x00000001, 0x00000013, 0x00000003),
-            Pickup::BoneHeart => (0x00000001, 0x00000015, 0x00000014),
-            Pickup::RottenHeart => (0x00000001, 0x0000001B, 0x0000001B),
-            Pickup::Penny => (0x00000002, 0x00000005, 0x0000000F),
-            Pickup::Nickel => (0x00000002, 0x00000005, 0x00000015),
-            Pickup::Dime => (0x00000002, 0x00000007, 0x00000007),
-            Pickup::LuckyPenny => (0x00000002, 0x00000007, 0x00000009),
-            Pickup::Key => (0x00000002, 0x00000007, 0x00000019),
-            Pickup::GoldenKey => (0x00000002, 0x00000009, 0x0000000F),
-            Pickup::ChargedKey => (0x00000002, 0x0000000F, 0x00000011),
-            Pickup::Bomb => (0x00000002, 0x0000000F, 0x00000019),
-            Pickup::GoldenBomb => (0x00000002, 0x00000015, 0x00000009),
-            Pickup::GigaBomb => (0x00000003, 0x00000001, 0x0000000E),
-            Pickup::MicroBattery => (0x00000003, 0x00000003, 0x0000001A),
-            Pickup::LilBattery => (0x00000003, 0x00000003, 0x0000001C),
-            Pickup::MegaBattery => (0x00000003, 0x00000003, 0x0000001D),
-            Pickup::Card => (0x00000003, 0x00000005, 0x00000014),
-            Pickup::Pill => (0x00000003, 0x00000005, 0x00000016),
-            Pickup::Rune => (0x00000003, 0x00000005, 0x00000019),
-            Pickup::DiceShard => (0x00000003, 0x00000007, 0x0000001D),
-            Pickup::CrackedKey => (0x00000003, 0x0000000D, 0x00000007),
+            RedHeart => (0x00000001, 0x00000005, 0x00000013),
+            SoulHeart => (0x00000001, 0x00000009, 0x0000001D),
+            BlackHeart => (0x00000001, 0x0000000B, 0x00000006),
+            EternalHeart => (0x00000001, 0x0000000B, 0x00000010),
+            GoldHeart => (0x00000001, 0x00000013, 0x00000003),
+            BoneHeart => (0x00000001, 0x00000015, 0x00000014),
+            RottenHeart => (0x00000001, 0x0000001B, 0x0000001B),
+            Penny => (0x00000002, 0x00000005, 0x0000000F),
+            Nickel => (0x00000002, 0x00000005, 0x00000015),
+            Dime => (0x00000002, 0x00000007, 0x00000007),
+            LuckyPenny => (0x00000002, 0x00000007, 0x00000009),
+            Key => (0x00000002, 0x00000007, 0x00000019),
+            GoldenKey => (0x00000002, 0x00000009, 0x0000000F),
+            ChargedKey => (0x00000002, 0x0000000F, 0x00000011),
+            Bomb => (0x00000002, 0x0000000F, 0x00000019),
+            GoldenBomb => (0x00000002, 0x00000015, 0x00000009),
+            GigaBomb => (0x00000003, 0x00000001, 0x0000000E),
+            MicroBattery => (0x00000003, 0x00000003, 0x0000001A),
+            LilBattery => (0x00000003, 0x00000003, 0x0000001C),
+            MegaBattery => (0x00000003, 0x00000003, 0x0000001D),
+            Card => (0x00000003, 0x00000005, 0x00000014),
+            Pill => (0x00000003, 0x00000005, 0x00000016),
+            Rune => (0x00000003, 0x00000005, 0x00000019),
+            DiceShard => (0x00000003, 0x00000007, 0x0000001D),
+            CrackedKey => (0x00000003, 0x0000000D, 0x00000007),
         }
     }
 }
@@ -445,14 +446,14 @@ struct SlotMap<S: Slotable, T> {
 }
 
 impl<S: Slotable, T> SlotMap<S, T> {
-    fn into_iter(self) -> impl Iterator<Item = (S, T)> {
+    fn into_iter(self) -> impl Iterator<Item = (S, T)> + DoubleEndedIterator {
         self.data
             .into_iter()
             .enumerate()
             .map(|(idx, t)| (S::from(idx), t))
     }
 
-    fn iter(&self) -> impl Iterator<Item = (S, &T)> {
+    fn iter(&self) -> impl Iterator<Item = (S, &T)> + DoubleEndedIterator {
         self.data
             .iter()
             .enumerate()
@@ -503,6 +504,104 @@ impl<S: Slotable, T: PartialEq + Eq> Eq for SlotMap<S, T> {}
 impl<S: Slotable, T: Debug> Debug for SlotMap<S, T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "SlotMap{{data: {:?}}}", self.data)
+    }
+}
+
+struct PickupIterator {
+    current: SlotMap<Pickup, u8>,
+    held: SlotMap<Pickup, u8>,
+    done: bool,
+}
+
+impl PickupIterator {
+    pub fn new(held: SlotMap<Pickup, u8>, pickups: u8) -> Self {
+        let mut current = SlotMap::<Pickup, u8>::default();
+        let mut remaining = pickups;
+        for (p, c) in held.iter() {
+            let to_move = u8::min(u8::min(*c, remaining), 8);
+            current[p] = to_move;
+            remaining -= to_move;
+        }
+        Self {
+            current,
+            held,
+            done: remaining != 0,
+        }
+    }
+}
+
+impl Iterator for PickupIterator {
+    type Item = [Pickup; 8];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.done {
+            return None;
+        }
+        let item = {
+            let mut item = [Pickup::RedHeart; 8];
+            let mut idx = 0;
+            for (p, c) in self.current.iter() {
+                for _ in 0..*c {
+                    item[idx] = p;
+                    idx += 1;
+                }
+            }
+            item
+        };
+
+        let mut increasable = None;
+        let mut increased = None;
+        for p in Pickup::iter().rev() {
+            if let Some(to_increase) = increasable {
+                if self.current[p] != 0 {
+                    self.current[p] -= 1;
+                    self.current[to_increase] += 1;
+                    increased = Some(to_increase);
+                    break;
+                }
+            }
+
+            if self.current[p] < self.held[p] {
+                increasable = Some(p);
+            }
+        }
+
+        if let Some(threshold) = increased {
+            let mut next_p = Pickup::iter();
+            let mut next_to_compact = Pickup::iter().rev();
+
+            let mut p = next_p.next().unwrap();
+            let mut to_compact = next_to_compact.next().unwrap();
+            while p < threshold {
+                p = next_p.next().unwrap();
+            }
+            loop {
+                while self.current[p] == self.held[p] {
+                    if let Some(n) = next_p.next() {
+                        p = n;
+                    } else {
+                        break;
+                    }
+                }
+                while self.current[to_compact] == 0 {
+                    if let Some(prev) = next_to_compact.next() {
+                        to_compact = prev;
+                    } else {
+                        break;
+                    }
+                }
+                if p >= to_compact {
+                    break;
+                }
+                let to_move = u8::min(self.held[p] - self.current[p], self.current[to_compact]);
+                self.current[p] += to_move;
+                self.current[to_compact] -= to_move;
+            }
+        } else {
+            self.done = true;
+        }
+
+        Some(item)
     }
 }
 
@@ -558,7 +657,7 @@ impl DeltaCrafter {
 
         let other = 8 - held_now as usize;
 
-        self.for_each_crafting_method(pickup, held_now as usize, other, |methods, method| {
+        self.for_each_crafting_method(pickup, other, |methods, method| {
             assert!(methods.insert(method));
         })
     }
@@ -580,7 +679,7 @@ impl DeltaCrafter {
 
         let other = 8 - held_before as usize;
 
-        self.for_each_crafting_method(pickup, held_before as usize, other, |methods, method| {
+        self.for_each_crafting_method(pickup, other, |methods, method| {
             assert!(methods.remove(&method));
         })
     }
@@ -588,23 +687,17 @@ impl DeltaCrafter {
     fn for_each_crafting_method<F: FnMut(&mut HashSet<InternalPickups>, InternalPickups)>(
         &mut self,
         pickup: Pickup,
-        held_count: usize,
         other_count: usize,
         mut f: F,
     ) {
-        for pickups in self
-            .held
-            .iter()
-            .filter(move |(p, _)| *p != pickup)
-            .flat_map(|(p, count)| std::iter::repeat(p).take(*count as usize))
-            .combinations(other_count)
-            .map(|comb| {
-                let mut k = [pickup; 8];
-                k[held_count..].copy_from_slice(comb.as_slice());
-                InternalPickups::new(k)
-            })
-            .unique()
-        {
+        let mut held = self.held.clone();
+        held[pickup] = 0;
+        for pickups in PickupIterator::new(held, other_count as u8).map(|mut pickups| {
+            for i in other_count..8 {
+                pickups[i] = pickup;
+            }
+            InternalPickups::new(pickups)
+        }) {
             f(&mut self.methods[self.crafter.craft(pickups)], pickups);
         }
     }
@@ -776,6 +869,7 @@ fn item_ids_to_js_item_ids(item_ids: &[InternalItemId]) -> ItemIds {
 
 #[cfg(test)]
 mod tests {
+    use itertools::Itertools;
     use once_cell::sync::Lazy;
 
     use Pickup::*;
@@ -1079,5 +1173,88 @@ mod tests {
         ]));
         assert_eq!(delta_crafter.held, held);
         assert_eq!(delta_crafter.methods, methods);
+    }
+
+    #[test]
+    fn pickup_iterator() {
+        let mut pickups = vec![
+            RedHeart, RedHeart, SoulHeart, Penny, Penny, Nickel, LuckyPenny, LilBattery, RedHeart,
+            RedHeart, SoulHeart, Penny, Penny, Nickel, LuckyPenny, LilBattery,
+        ];
+        pickups.sort();
+        let mut held = SlotMap::<Pickup, u8>::default();
+        for p in pickups.iter().copied() {
+            held[p] += 1;
+        }
+        let actual = PickupIterator::new(held, 8)
+            .map(|pickups| Vec::from(&pickups[..]))
+            .collect::<HashSet<_>>();
+        let correct = pickups
+            .iter()
+            .copied()
+            .combinations(8)
+            .collect::<HashSet<_>>();
+        let unexpected = actual.difference(&correct).collect::<HashSet<_>>();
+        let expected = correct.difference(&actual).collect::<HashSet<_>>();
+        assert!(
+            unexpected.is_empty() && expected.is_empty(),
+            "unexpected: {:?}\nexpected: {:?}",
+            unexpected,
+            expected
+        );
+    }
+
+    #[test]
+    fn pickup_iterator_simple() {
+        let mut pickups = vec![RedHeart, RedHeart, Nickel, LuckyPenny, LilBattery];
+        pickups.sort();
+        let mut held = SlotMap::<Pickup, u8>::default();
+        for p in pickups.iter().copied() {
+            held[p] += 1;
+        }
+        let actual = PickupIterator::new(held, 2)
+            .map(|pickups| Vec::from(&pickups[..2]))
+            .collect::<HashSet<_>>();
+        let correct = pickups
+            .iter()
+            .copied()
+            .combinations(2)
+            .collect::<HashSet<_>>();
+        let unexpected = actual.difference(&correct).collect::<HashSet<_>>();
+        let expected = correct.difference(&actual).collect::<HashSet<_>>();
+        assert!(
+            unexpected.is_empty() && expected.is_empty(),
+            "unexpected: {:?}\nexpected: {:?}",
+            unexpected,
+            expected
+        );
+    }
+
+    #[test]
+    fn pickup_iterator_med() {
+        let mut pickups = vec![
+            RedHeart, Nickel, Nickel, Nickel, LuckyPenny, LuckyPenny, LuckyPenny, LilBattery,
+        ];
+        pickups.sort();
+        let mut held = SlotMap::<Pickup, u8>::default();
+        for p in pickups.iter().copied() {
+            held[p] += 1;
+        }
+        let actual = PickupIterator::new(held, 3)
+            .map(|pickups| Vec::from(&pickups[..3]))
+            .collect::<HashSet<_>>();
+        let correct = pickups
+            .iter()
+            .copied()
+            .combinations(3)
+            .collect::<HashSet<_>>();
+        let unexpected = actual.difference(&correct).collect::<HashSet<_>>();
+        let expected = correct.difference(&actual).collect::<HashSet<_>>();
+        assert!(
+            unexpected.is_empty() && expected.is_empty(),
+            "unexpected: {:?}\nexpected: {:?}",
+            unexpected,
+            expected
+        );
     }
 }

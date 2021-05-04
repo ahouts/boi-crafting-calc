@@ -22,7 +22,7 @@ export function App(): React.ReactElement {
   })
 
   return (
-    <div>
+    <div className={'w-screen'}>
       <Pickups />
       <Items />
     </div>

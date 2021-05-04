@@ -7,7 +7,7 @@ export function Items(): React.ReactElement {
   const state = useSelector(select_crafter)
 
   return (
-    <div>
+    <div className={'flex flex-auto w-auto'}>
       {state.items.map(item => (
         <Item key={item} item_id={item} />
       ))}

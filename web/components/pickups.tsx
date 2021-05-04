@@ -4,7 +4,9 @@ import { Pickup } from './pickup'
 
 export function Pickups(): React.ReactElement {
   return (
-    <div>
+    <div className={
+      'grid grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7 w-auto justify-items-center'
+    }>
       {Object.values(TPickup)
         .filter(key => isNaN(Number(key)))
         .map(k => k as TPickup)
