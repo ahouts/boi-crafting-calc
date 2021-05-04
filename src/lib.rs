@@ -606,8 +606,10 @@ impl Iterator for PickupIterator {
 }
 
 #[wasm_bindgen]
+#[derive(Debug)]
 pub struct DeltaCrafter {
     crafter: BasicCrafter,
+    cache: HashMap<InternalPickups, InternalItemId>,
     methods: SlotMap<InternalItemId, HashSet<InternalPickups>>,
     held: SlotMap<Pickup, u8>,
 }
@@ -650,7 +652,8 @@ impl DeltaCrafter {
         if held_now >= 8 {
             if held_now == 8 {
                 let pickups = InternalPickups::new([pickup; 8]);
-                assert!(self.methods[self.crafter.craft(pickups)].insert(pickups));
+                let item_id = self.craft(pickups);
+                assert!(self.methods[item_id].insert(pickups));
             }
             return;
         }
@@ -672,7 +675,8 @@ impl DeltaCrafter {
         if held_before >= 8 {
             if held_before == 8 {
                 let pickups = InternalPickups::new([pickup; 8]);
-                assert!(self.methods[self.crafter.craft(pickups)].remove(&pickups));
+                let item_id = self.craft(pickups);
+                assert!(self.methods[item_id].remove(&pickups));
             }
             return;
         }
@@ -684,6 +688,16 @@ impl DeltaCrafter {
         })
     }
 
+    fn craft(&mut self, pickups: InternalPickups) -> InternalItemId {
+        if let Some(item_id) = self.cache.get(&pickups).copied() {
+            item_id
+        } else {
+            let item_id = self.crafter.craft(pickups);
+            self.cache.insert(pickups, item_id);
+            item_id
+        }
+    }
+
     fn for_each_crafting_method<F: FnMut(&mut HashSet<InternalPickups>, InternalPickups)>(
         &mut self,
         pickup: Pickup,
@@ -693,21 +707,25 @@ impl DeltaCrafter {
         let mut held = self.held.clone();
         held[pickup] = 0;
         for pickups in PickupIterator::new(held, other_count as u8).map(|mut pickups| {
-            for i in other_count..8 {
-                pickups[i] = pickup;
+            for s in pickups.iter_mut().skip(other_count) {
+                *s = pickup;
             }
             InternalPickups::new(pickups)
         }) {
-            f(&mut self.methods[self.crafter.craft(pickups)], pickups);
+            let item_id = self.craft(pickups);
+            f(&mut self.methods[item_id], pickups);
         }
     }
 }
 
 impl Default for DeltaCrafter {
     fn default() -> Self {
+        let mut current = SlotMap::default();
+        current[Pickup::RedHeart] = 8;
         Self {
             crafter: Default::default(),
-            methods: SlotMap::default(),
+            cache: Default::default(),
+            methods: Default::default(),
             held: Default::default(),
         }
     }
