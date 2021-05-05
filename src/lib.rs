@@ -1,11 +1,9 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
-use std::io::Cursor;
 use std::marker::PhantomData;
 use std::ops::{Index, IndexMut, RangeInclusive};
 
-use flate2::read::ZlibDecoder;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use smartstring::{LazyCompact, SmartString};
 use strum::IntoEnumIterator;
@@ -392,13 +390,14 @@ impl ItemPool {
     }
 }
 
-fn get_pool_item_weights() -> HashMap<ItemPool, HashMap<InternalItemId, f32>> {
-    const ITEM_POOLS_DATA_ZLIB_DEFLATE: &[u8] = include_bytes!("itempools.xml.zz");
-    let reader = ZlibDecoder::new(Cursor::new(ITEM_POOLS_DATA_ZLIB_DEFLATE));
-    let pools: ItemPools = serde_xml_rs::from_reader(reader).unwrap();
+fn get_pool_item_weights(
+    itempools_xml: &str,
+) -> Result<HashMap<ItemPool, HashMap<InternalItemId, f32>>, JsValue> {
+    let pools: ItemPools = serde_xml_rs::from_reader(itempools_xml.as_bytes())
+        .map_err(|e| JsValue::from(format!("error parsing itempools xml: {}", e)))?;
     let item_pool_lookup: HashMap<&'static str, ItemPool> =
         ItemPool::iter().map(|pool| (pool.name(), pool)).collect();
-    pools
+    Ok(pools
         .pools
         .into_iter()
         .map(|pool| {
@@ -410,7 +409,7 @@ fn get_pool_item_weights() -> HashMap<ItemPool, HashMap<InternalItemId, f32>> {
                     .collect(),
             )
         })
-        .collect()
+        .collect())
 }
 
 #[derive(Debug, Deserialize)]
@@ -425,15 +424,14 @@ struct ItemMetadata {
     quality: u32,
 }
 
-fn get_item_qualities() -> SlotMap<InternalItemId, u32> {
-    const ITEM_POOLS_DATA_ZLIB_DEFLATE: &[u8] = include_bytes!("items_metadata.xml.zz");
-    let reader = ZlibDecoder::new(Cursor::new(ITEM_POOLS_DATA_ZLIB_DEFLATE));
-    let metadata: ItemsMetadata = serde_xml_rs::from_reader(reader).unwrap();
+fn get_item_qualities(items_metadata_xml: &str) -> Result<SlotMap<InternalItemId, u32>, JsValue> {
+    let metadata: ItemsMetadata = serde_xml_rs::from_reader(items_metadata_xml.as_bytes())
+        .map_err(|e| JsValue::from(format!("error parsing item metadata xml: {}", e)))?;
     let mut result = SlotMap::default();
     for item in metadata.items {
         result[item.id] = item.quality;
     }
-    result
+    Ok(result)
 }
 
 trait Slotable: Clone + From<usize> + Into<usize> {
@@ -617,8 +615,13 @@ pub struct DeltaCrafter {
 #[wasm_bindgen]
 impl DeltaCrafter {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> Self {
-        Self::default()
+    pub fn new(itempools_xml: &str, items_metadata_xml: &str) -> Result<DeltaCrafter, JsValue> {
+        Ok(DeltaCrafter {
+            crafter: BasicCrafter::new(itempools_xml, items_metadata_xml)?,
+            cache: Default::default(),
+            methods: Default::default(),
+            held: Default::default(),
+        })
     }
 
     pub fn pickups(&self) -> Result<HeldPickups, JsValue> {
@@ -718,19 +721,6 @@ impl DeltaCrafter {
     }
 }
 
-impl Default for DeltaCrafter {
-    fn default() -> Self {
-        let mut current = SlotMap::default();
-        current[Pickup::RedHeart] = 8;
-        Self {
-            crafter: Default::default(),
-            cache: Default::default(),
-            methods: Default::default(),
-            held: Default::default(),
-        }
-    }
-}
-
 trait Crafter {
     fn craft(&self, pickups: InternalPickups) -> InternalItemId;
 }
@@ -741,13 +731,13 @@ pub struct BasicCrafter {
     item_qualities: SlotMap<InternalItemId, u32>,
 }
 
-impl Default for BasicCrafter {
-    fn default() -> Self {
+impl BasicCrafter {
+    fn new(itempools_xml: &str, items_metadata_xml: &str) -> Result<Self, JsValue> {
         set_panic_hook();
-        BasicCrafter {
-            pool_item_weights: get_pool_item_weights(),
-            item_qualities: get_item_qualities(),
-        }
+        Ok(BasicCrafter {
+            pool_item_weights: get_pool_item_weights(itempools_xml)?,
+            item_qualities: get_item_qualities(items_metadata_xml)?,
+        })
     }
 }
 
@@ -894,7 +884,15 @@ mod tests {
 
     use super::*;
 
-    static SIMPLE_CACHE: Lazy<BasicCrafter> = Lazy::new(BasicCrafter::default);
+    const ITEMPOOLS_XML: &str = include_str!("../web/assets/itempools.xml");
+    const ITEMS_METADATA_XML: &str = include_str!("../web/assets/items_metadata.xml");
+
+    static SIMPLE_CACHE: Lazy<BasicCrafter> =
+        Lazy::new(|| BasicCrafter::new(ITEMPOOLS_XML, ITEMS_METADATA_XML).unwrap());
+
+    fn get_delta_crafter() -> DeltaCrafter {
+        DeltaCrafter::new(ITEMPOOLS_XML, ITEMS_METADATA_XML).unwrap()
+    }
 
     #[test]
     fn craft_moms_knife() {
@@ -946,7 +944,7 @@ mod tests {
 
     #[test]
     fn delta_crafter() {
-        let mut delta_crafter = DeltaCrafter::default();
+        let mut delta_crafter = get_delta_crafter();
         let mut methods = SlotMap::<InternalItemId, HashSet<InternalPickups>>::default();
         let mut held = SlotMap::<Pickup, u8>::default();
         assert_eq!(delta_crafter.held, held);
@@ -1109,7 +1107,7 @@ mod tests {
 
     #[test]
     fn delta_crafter_at_8() {
-        let mut delta_crafter = DeltaCrafter::default();
+        let mut delta_crafter = get_delta_crafter();
         let mut methods = SlotMap::<InternalItemId, HashSet<InternalPickups>>::default();
         let mut held = SlotMap::<Pickup, u8>::default();
         assert_eq!(delta_crafter.held, held);

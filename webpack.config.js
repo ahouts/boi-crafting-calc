@@ -38,6 +38,14 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /$never^/,
+        use: [
+          {
+            loader: 'raw-loader',
+          },
+        ],
+      }
     ],
   },
   plugins: [
