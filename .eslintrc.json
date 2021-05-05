@@ -85,7 +85,8 @@
     "consistent-this": [
       "error",
       "self"
-    ]
+    ],
+    "@typescript-eslint/no-var-requires": "off"
   },
   "ignorePatterns": [
     "pkg/*",
