@@ -8,7 +8,7 @@ import './styles.css'
 render(
   <React.StrictMode>
     <Provider store={store}>
-      <div className={'min-w-screen min-h-screen bg-red-100'}>
+      <div className={'min-w-screen min-h-screen bg-gray-900 text-white'}>
         <App />
       </div>
     </Provider>

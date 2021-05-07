@@ -48,9 +48,15 @@ export const crafter_slice = createSlice({
         update_fields(state)
       }
     },
+    reset: (state) => {
+      if (state.crafter !== null) {
+        state.crafter.reset()
+        update_fields(state)
+      }
+    },
   },
 })
 
 export type CrafterState = ReturnType<typeof crafter_slice.reducer>
-export const { clear, set, add_pickup, remove_pickup } = crafter_slice.actions
+export const { clear, set, add_pickup, remove_pickup, reset } = crafter_slice.actions
 export const select_crafter: Selector<RootState, CrafterState> = store => store.crafter

@@ -1,11 +1,10 @@
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use smartstring::{LazyCompact, SmartString};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::{Index, IndexMut, RangeInclusive};
-
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use smartstring::{LazyCompact, SmartString};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 use wasm_bindgen::prelude::*;
@@ -457,6 +456,13 @@ impl<S: Slotable, T> SlotMap<S, T> {
             .enumerate()
             .map(|(idx, t)| (S::from(idx), t))
     }
+
+    fn iter_mut(&mut self) -> impl Iterator<Item = (S, &mut T)> {
+        self.data
+            .iter_mut()
+            .enumerate()
+            .map(|(idx, t)| (S::from(idx), t))
+    }
 }
 
 impl<S: Slotable, T: Default + Clone> Default for SlotMap<S, T> {
@@ -689,6 +695,11 @@ impl DeltaCrafter {
         self.for_each_crafting_method(pickup, other, |methods, method| {
             assert!(methods.remove(&method));
         })
+    }
+
+    pub fn reset(&mut self) {
+        self.held.iter_mut().for_each(|(_, h)| *h = 0);
+        self.methods.iter_mut().for_each(|(_, m)| m.clear());
     }
 
     fn craft(&mut self, pickups: InternalPickups) -> InternalItemId {

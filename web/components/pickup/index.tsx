@@ -16,16 +16,20 @@ export function Pickup({ pickup }: PickupArgs): React.ReactElement {
   const dispatch = useDispatch()
 
   return (
-    <div className={'p-4 my-1 w-54 max-w-sm mx-auto bg-white rounded-xl flex shadow-md space-x-2'}>
+    <div className={'p-4 my-1 w-54 max-w-sm mx-auto bg-gray-700 rounded-xl flex shadow-md space-x-2'}>
       <img className={'object-contain pr-3'} src={images[`${pickup}.png`]} alt={pickup as unknown as string} />
-      <button className={'p-3 rounded-xl shadow-md space-x-1 flex-shrink'} onClick={() => {
-        dispatch(remove_pickup(pickup))
-      }}><FaMinus />
+      <button className={'p-3 rounded-xl shadow-md space-x-1 flex-shrink bg-gray-800 hover:bg-gray-900'}
+              onClick={() => {
+                dispatch(remove_pickup(pickup))
+              }}>
+        <FaMinus />
       </button>
-      <p className={'p-2 text-xl text-gray-500 flex-shrink'}>{state.pickups[pickup] ?? 0}</p>
-      <button className={'p-3 rounded-xl shadow-md space-x-1 flex-shrink'} onClick={() => {
-        dispatch(add_pickup(pickup))
-      }}><FaPlus />
+      <p className={'p-2 text-xl flex-shrink'}>{state.pickups[pickup] ?? 0}</p>
+      <button className={'p-3 rounded-xl shadow-md space-x-1 flex-shrink bg-gray-800 hover:bg-gray-900'}
+              onClick={() => {
+                dispatch(add_pickup(pickup))
+              }}>
+        <FaPlus />
       </button>
     </div>
   )
