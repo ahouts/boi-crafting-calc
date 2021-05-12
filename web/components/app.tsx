@@ -27,16 +27,17 @@ export function App(): React.ReactElement {
   })
 
   return (
-    <div className={'w-screen'}>
-      <React.Suspense fallback={<p>loading...</p>}>
-        <Pickups />
+    <React.Suspense fallback={<p>loading...</p>}>
+      <div className={'w-screen min-h-screen flex flex-col'}>
+        <Pickups class_names={'flex-shrink-0'} />
         <button onClick={() => dispatch(reset())} className={
-          'p-3 rounded-xl shadow-md space-x-1 flex-shrink capitalize font-bold bg-red-800 hover:bg-red-900'
+          'p-3 rounded-xl shadow-md space-x-1 flex-shrink capitalize font-bold bg-red-800 hover:bg-red-900 ' +
+          'flex-shrink-0'
         }>
           reset selection
         </button>
-        <Items />
-      </React.Suspense>
-    </div>
+        <Items class_names={'flex-grow'} />
+      </div>
+    </React.Suspense>
   )
 }

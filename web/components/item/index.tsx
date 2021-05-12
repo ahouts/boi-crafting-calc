@@ -13,6 +13,7 @@ export function Item({ item_id }: ItemArgs): React.ReactElement {
     <img
       alt={`item ${item_id}`}
       src={images[`collectibles_${item_id.toString().padStart(3, '0')}.png`]}
+      className={'flex-none object-contain w-16 h-16'}
     />
   )
 }
