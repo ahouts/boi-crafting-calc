@@ -198,6 +198,12 @@ extern "C" {
 
     #[wasm_bindgen(typescript_type = "Array<ItemId>")]
     pub type ItemIds;
+
+    #[wasm_bindgen(typescript_type = "Array<Pickup>")]
+    pub type Recipe;
+
+    #[wasm_bindgen(typescript_type = "Array<Recipe>")]
+    pub type Recipes;
 }
 
 const QUALITY_BOUNDS_LIST: [(u32, RangeInclusive<u32>); 8] = [
@@ -702,6 +708,12 @@ impl DeltaCrafter {
         self.methods.iter_mut().for_each(|(_, m)| m.clear());
     }
 
+    pub fn get_recipes(&self, item: ItemId) -> Result<Recipes, JsValue> {
+        let item_id = js_item_id_to_item_id(item)?;
+        let recipes: Vec<InternalPickups> = self.methods[item_id].iter().copied().collect();
+        Ok(recipes_to_js_recipes(recipes.as_slice()).unchecked_into())
+    }
+
     fn craft(&mut self, pickups: InternalPickups) -> InternalItemId {
         if let Some(item_id) = self.cache.get(&pickups).copied() {
             item_id
@@ -878,10 +890,54 @@ fn sort_pickups(mut pickups: [Pickup; 8]) -> [Pickup; 8] {
     pickups
 }
 
+fn recipes_to_js_recipes(recipes: &[InternalPickups]) -> JsValue {
+    let array = js_sys::Array::new_with_length(recipes.len() as u32);
+    for (i, recipe) in recipes.iter().copied().enumerate() {
+        let r = js_sys::Array::new_with_length(8);
+        for (j, p) in recipe.pickups.iter().copied().enumerate() {
+            r.set(
+                j as u32,
+                JsValue::from(wasm_bindgen::convert::IntoWasmAbi::into_abi(p)),
+            );
+        }
+        array.set(i as u32, r.unchecked_into());
+    }
+    array.unchecked_into()
+}
+
+fn js_item_id_to_item_id(item_id: ItemId) -> Result<InternalItemId, JsValue> {
+    let js_value: JsValue = item_id.unchecked_into();
+    let id: f64 = js_value.as_f64().map(Ok).unwrap_or_else(|| {
+        Err(JsValue::from(format!(
+            "{:?} is not a valid item id",
+            js_value
+        )))
+    })?;
+    let r = id.round() as u16;
+    if r as f64 != id {
+        return Err(JsValue::from(format!(
+            "{:?} is not a valid item id",
+            js_value
+        )));
+    }
+    let f = InternalItemId(r);
+    if f > InternalItemId::largest() {
+        return Err(JsValue::from(format!(
+            "{:?} is not a valid item id",
+            js_value
+        )));
+    }
+    Ok(f)
+}
+
+fn item_id_to_js_item_id(item_id: InternalItemId) -> ItemId {
+    JsValue::from(item_id.0).unchecked_into()
+}
+
 fn item_ids_to_js_item_ids(item_ids: &[InternalItemId]) -> ItemIds {
     let array = js_sys::Array::new_with_length(item_ids.len() as u32);
     for (i, item_id) in item_ids.iter().copied().enumerate() {
-        array.set(i as u32, JsValue::from(item_id.0));
+        array.set(i as u32, item_id_to_js_item_id(item_id).unchecked_into());
     }
     array.unchecked_into()
 }
