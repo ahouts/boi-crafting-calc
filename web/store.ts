@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { crafter_slice } from './reducers/crafter_slice'
+import { crafter_slice } from './slices/crafter_slice'
 import thunk from 'redux-thunk'
 
 const store = configureStore({

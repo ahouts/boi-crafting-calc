@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import { Item } from './item'
-import { select_crafter } from '../reducers/crafter_slice'
+import { select_crafter } from '../slices/crafter_slice'
 import { string_or_empty } from '../util/defaults'
 
 export interface ItemsParams {

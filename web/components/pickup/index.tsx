@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Pickup as TPickup } from '../../../pkg'
 import { useDispatch, useSelector } from 'react-redux'
-import { add_pickup, remove_pickup, select_crafter } from '../../reducers/crafter_slice'
+import { add_pickup, remove_pickup, select_crafter } from '../../slices/crafter_slice'
 import { FaMinus, FaPlus } from 'react-icons/fa'
 import { import_all } from '../../image_utils'
 

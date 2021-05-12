@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import init, { DeltaCrafter } from '../../pkg/boi_crafting_calc'
-import { clear, reset, set } from '../reducers/crafter_slice'
+import { clear, reset, set } from '../slices/crafter_slice'
 
 const Pickups = React.lazy(() => import('./pickups').then(pickups => ({ default: pickups.Pickups })))
 const Items = React.lazy(() => import('./items').then(items => ({ default: items.Items })))
