@@ -1,5 +1,5 @@
 import { createSlice, Draft, PayloadAction } from '@reduxjs/toolkit'
-import { DeltaCrafter, ItemId, Pickup } from '../../pkg'
+import { DeltaCrafter, ItemId, Pickup, Recipe } from '../../pkg'
 import { RootState } from '../store'
 import { Selector } from 'react-redux'
 
@@ -25,6 +25,7 @@ export const crafter_slice = createSlice({
     crafter: null as DeltaCrafter | null,
     pickups: {} as Record<Pickup, number>,
     items: [] as Array<ItemId>,
+    recipes: null as { item_id: ItemId, recipes: Array<Recipe> } | null,
   },
   reducers: {
     set: (state, payload: PayloadAction<DeltaCrafter>) => {
@@ -54,9 +55,17 @@ export const crafter_slice = createSlice({
         update_fields(state)
       }
     },
+    get_recipes: (state, payload: PayloadAction<ItemId>) => {
+      if (state.crafter !== null) {
+        state.recipes = {
+          item_id: payload.payload,
+          recipes: state.crafter.get_recipes(payload.payload),
+        }
+      }
+    },
   },
 })
 
 export type CrafterState = ReturnType<typeof crafter_slice.reducer>
-export const { clear, set, add_pickup, remove_pickup, reset } = crafter_slice.actions
+export const { clear, set, add_pickup, remove_pickup, reset, get_recipes } = crafter_slice.actions
 export const select_crafter: Selector<RootState, CrafterState> = store => store.crafter

@@ -1,10 +1,11 @@
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use smartstring::{LazyCompact, SmartString};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::{Index, IndexMut, RangeInclusive};
+
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use smartstring::{LazyCompact, SmartString};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 use wasm_bindgen::prelude::*;
@@ -189,18 +190,21 @@ const TS_APPEND_ITEM_ID: &'static str = r#"
 type ItemId = number;
 "#;
 
+#[wasm_bindgen(typescript_custom_section)]
+const TS_APPEND_RECIPE: &'static str = r#"
+type Recipe = Array<Pickup>;
+"#;
+
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(typescript_type = "Record<Pickup, number>")]
     pub type HeldPickups;
 
+    #[wasm_bindgen(typescript_type = "ItemId")]
     pub type ItemId;
 
     #[wasm_bindgen(typescript_type = "Array<ItemId>")]
     pub type ItemIds;
-
-    #[wasm_bindgen(typescript_type = "Array<Pickup>")]
-    pub type Recipe;
 
     #[wasm_bindgen(typescript_type = "Array<Recipe>")]
     pub type Recipes;
