@@ -58,6 +58,15 @@ export const crafter_slice = createSlice({
         }
       }
     },
+    craft_recipe: (state, payload: PayloadAction<Recipe>) => {
+      if (state.crafter !== null) {
+        state.recipes = null
+        for (const pickup of payload.payload) {
+          state.crafter.remove_pickup(native_pickup(pickup))
+        }
+        update_fields(state)
+      }
+    },
     clear_recipes: (state) => {
       state.recipes = null
     },
@@ -65,5 +74,5 @@ export const crafter_slice = createSlice({
 })
 
 export type CrafterState = ReturnType<typeof crafter_slice.reducer>
-export const { set, add_pickup, remove_pickup, reset, get_recipes, clear_recipes } = crafter_slice.actions
+export const { set, add_pickup, remove_pickup, reset, get_recipes, clear_recipes, craft_recipe } = crafter_slice.actions
 export const select_crafter: Selector<RootState, CrafterState> = store => store.crafter
