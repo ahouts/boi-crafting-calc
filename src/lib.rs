@@ -918,7 +918,7 @@ fn js_item_id_to_item_id(item_id: ItemId) -> Result<InternalItemId, JsValue> {
         )))
     })?;
     let r = id.round() as u16;
-    if r as f64 != id {
+    if (r as f64 - id).abs() > 0.1 {
         return Err(JsValue::from(format!(
             "{:?} is not a valid item id",
             js_value

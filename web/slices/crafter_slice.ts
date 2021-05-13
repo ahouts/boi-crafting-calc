@@ -31,12 +31,6 @@ export const crafter_slice = createSlice({
     set: (state, payload: PayloadAction<DeltaCrafter>) => {
       state.crafter = payload.payload
     },
-    clear: (state) => {
-      if (state.crafter !== null) {
-        state.crafter.free()
-        state.crafter = null
-      }
-    },
     add_pickup: (state, payload: PayloadAction<Pickup>) => {
       if (state.crafter !== null) {
         state.crafter.add_pickup(native_pickup(payload.payload))
@@ -52,6 +46,7 @@ export const crafter_slice = createSlice({
     reset: (state) => {
       if (state.crafter !== null) {
         state.crafter.reset()
+        state.recipes = null
         update_fields(state)
       }
     },
@@ -63,9 +58,12 @@ export const crafter_slice = createSlice({
         }
       }
     },
+    clear_recipes: (state) => {
+      state.recipes = null
+    },
   },
 })
 
 export type CrafterState = ReturnType<typeof crafter_slice.reducer>
-export const { clear, set, add_pickup, remove_pickup, reset, get_recipes } = crafter_slice.actions
+export const { set, add_pickup, remove_pickup, reset, get_recipes, clear_recipes } = crafter_slice.actions
 export const select_crafter: Selector<RootState, CrafterState> = store => store.crafter

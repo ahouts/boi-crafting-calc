@@ -35,11 +35,8 @@
       "CallExpression",
       "TSQualifiedName",
       "Property",
-      "TSImportEqualsDeclaration"
-    ],
-    "snakecasejs/whitelist": [
-      "externalPath",
-      "setNumber"
+      "TSImportEqualsDeclaration",
+      "FunctionDeclaration"
     ]
   },
   "rules": {
